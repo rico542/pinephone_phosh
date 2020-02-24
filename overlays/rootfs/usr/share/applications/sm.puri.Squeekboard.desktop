@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Squeekboard
+GenericName=Squeekboard Virtual Keyboard
+Comment=Virtual Keyboard
+Exec=squeekboard-restyled
+Terminal=false
+Type=Application
+NoDisplay=true
+Categories=GTK;Utility;

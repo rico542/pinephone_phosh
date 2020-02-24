@@ -1,0 +1,67 @@
+{{- $architecture := or .architecture "arm64" -}}
+{{- $image := or .image "debian-pinephone.img" -}}
+{{- $username := or .username "debian" -}}
+
+architecture: {{ $architecture }}
+
+actions:
+  - action: unpack
+    file: rootfs.tar.gz
+
+  - action: overlay
+    source: overlays/rootfs
+
+  - action: apt
+    description: Install phone-specific packages
+    packages:
+      - firmware-rtl8723cs
+      - phoc
+      - phosh
+
+  - action: run
+    description: Set up default user
+    chroot: true
+    script: scripts/setup-user.sh {{ $username }}
+
+  - action: image-partition
+    imagename: {{ $image }}
+    imagesize: 4GB
+    partitiontype: msdos
+    mountpoints:
+      - mountpoint: /
+        partition: rootfs
+    partitions:
+      - name: rootfs
+        fs: ext4
+        start: 1MB
+        end: 100%
+        flags: [ boot ]
+
+  - action: filesystem-deploy
+    description: Deploy filesystem onto image
+
+  - action: apt
+    description: Install kernel
+    packages:
+      - linux-image-5.5-pinephone
+
+  - action: run
+    description: Create initramfs uImage
+    chroot: true
+    command: mkimage -T ramdisk -A arm64 -C none -n pinephone -d /boot/initrd.img /boot/initrd.uImg
+
+  - action: run
+    description: Cleanup filesystem
+    chroot: true
+    script: scripts/cleanup.sh
+
+  - action: raw
+    description: Install bootloader
+    origin: recipe
+    source: files/u-boot-sunxi-with-spl.bin
+    offset: 8192
+
+  - action: run
+    description: Create block map file
+    postprocess: true
+    command: bmaptool create {{ $image }} > {{ $image }}.bmap

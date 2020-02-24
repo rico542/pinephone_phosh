@@ -1,0 +1,50 @@
+{{- $architecture := or .architecture "arm64" -}}
+{{- $hostname := or .hostname "pinephone" -}}
+
+architecture: {{ $architecture }}
+
+actions:
+  - action: debootstrap
+    suite: sid
+    components:
+      - main
+      - contrib
+      - non-free
+    mirror: https://deb.debian.org/debian
+    variant: minbase
+
+  - action: run
+    description: Add hostname
+    chroot: true
+    command: echo {{ $hostname }} > /etc/hostname
+
+  - action: apt
+    description: Install debian packages
+    packages:
+      ## Minimal ##
+      - u-boot-tools
+      - initramfs-tools
+      - apt-utils
+      # Utils
+      - sudo
+      - wireless-tools
+      - alsa-utils
+      - bluetooth
+      - iw
+      - mobile-broadband-provider-info
+      - modemmanager
+      - net-tools
+      - network-manager-gnome
+      - ofono
+      - rfkill
+      - nano
+      # OS
+      - gnome-terminal
+      - gdm3
+      ## End Minimal ##
+      ## AddOns if you need them ##
+      # Eg - gnome-control-center
+      ## End AddOns ##
+
+  - action: pack
+    file: rootfs.tar.gz

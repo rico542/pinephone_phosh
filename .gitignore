@@ -1,0 +1,6 @@
+build/
+*.img
+*.img.gz
+*.img.xz
+*.bmap
+*.tar.gz
