@@ -1,6 +1,7 @@
 {{- $architecture := or .architecture "arm64" -}}
 {{- $image := or .image "debian-pinephone.img" -}}
 {{- $username := or .username "debian" -}}
+{{- $kernel := or .kernel "5.5-pinephone" }}
 
 architecture: {{ $architecture }}
 
@@ -23,6 +24,11 @@ actions:
     chroot: true
     script: scripts/setup-user.sh {{ $username }}
 
+  - action: run
+    description: Enable modem on startup
+    chroot: true
+    command: systemctl enable pinephone-modem.service
+
   - action: image-partition
     imagename: {{ $image }}
     imagesize: 4GB
@@ -43,12 +49,7 @@ actions:
   - action: apt
     description: Install kernel
     packages:
-      - linux-image-5.5-pinephone
-
-  - action: run
-    description: Create initramfs uImage
-    chroot: true
-    command: mkimage -T ramdisk -A arm64 -C none -n pinephone -d /boot/initrd.img /boot/initrd.uImg
+      - linux-image-{{ $kernel }}
 
   - action: run
     description: Cleanup filesystem

@@ -1,0 +1,12 @@
+[Unit]
+Description=Enable EG25 modem
+Requires=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/pinephone-modem.sh on
+ExecStop=/usr/bin/pinephone-modem.sh off
+
+[Install]
+WantedBy=graphical.target
